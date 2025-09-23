@@ -1,10 +1,10 @@
-from textnode import TextType
-from textnode import TextNode
+from textnode import TextType, TextNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 def main():
-    dummy = TextNode("hello", TextType.LINK, "google.com")
-    print(dummy)
-
+    child_node = LeafNode("span", "child")
+    parent_node = ParentNode("div", [child_node])
+    print(parent_node.to_html())
 
 main()
