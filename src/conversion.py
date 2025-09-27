@@ -34,68 +34,84 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         elif node.text.count(delimiter) % 2 != 0:
             raise Exception("Missing closing delimiter")
 
-        sep = node.text.split(delimiter)
+        else:
+            sep = node.text.split(delimiter)
 
-        for i in range(len(sep)):
-            if i % 2 == 0:
-                if sep[i] != "":
-                    new_nodes.append(TextNode(sep[i], TextType.TEXT))
-            else:
-                new_nodes.append(TextNode(sep[i], text_type))
+            for i in range(len(sep)):
+                if i % 2 == 0:
+                    if sep[i] != "":
+                        new_nodes.append(TextNode(sep[i], TextType.TEXT))
+                else:
+                    new_nodes.append(TextNode(sep[i], text_type))
 
     return new_nodes
 
 #Convert raw markdown to alt and href touples for images and links
 def extract_markdown_images(text):
-    tuples = []
-    alts = re.findall(r"\[(.*?)\]", text)
-    hrefs = re.findall(r"\((https?://.*?)\)", text)
-    if len(alts) != len(hrefs):
-        raise Exception("Invalid image formatting")
-    for i in range(len(alts)):
-        tuple = (alts[i], hrefs[i])
-        tuples.append(tuple)
-    return tuples
+    images = re.findall(r"!\[(.*?)\]\((https?://.*?)\)", text)
+    return images
 
-
+def extract_markdown_links(text):
+    images = re.findall(r"\[(.*?)\]\((https?://.*?)\)", text)
+    return images
 #Split raw markdown text into TextNodes based on images and links
 
 def split_nodes_image(old_nodes):
     new_nodes = []
     for node in old_nodes:
         if node.text_type is not TextType.TEXT:
-            raise Exception("Nodes can only be TextType.TEXT")
-        extract = extract_markdown_images(node.text)
-        text_types = list(filter(None, re.split(r"!\[.*?\]\(.*?\)", node.text)))
-        ecount = 0
-        tcount = 0
-        for i in range(len(extract) + len(text_types)):
-            if i % 2 == 0:
-                new = TextNode(text_types[tcount], TextType.TEXT)
-                new_nodes.append(new)
-                tcount += 1
-            else:
-                new = TextNode(extract[ecount][0], TextType.IMAGE, extract[ecount][1])
-                new_nodes.append(new)
-                ecount += 1
+            new_nodes.append(node)
+        else:
+            extract = extract_markdown_images(node.text)
+            text_types = list(filter(None, re.split(r"!\[.*?\]\(.*?\)", node.text)))
+            ecount = 0
+            tcount = 0
+            for i in range(len(extract) + len(text_types)):
+                if i % 2 == 0:
+                    new = TextNode(text_types[tcount], TextType.TEXT)
+                    new_nodes.append(new)
+                    tcount += 1
+                else:
+                    new = TextNode(extract[ecount][0], TextType.IMAGE, extract[ecount][1])
+                    new_nodes.append(new)
+                    ecount += 1
     return new_nodes
 
 def split_nodes_link(old_nodes):
     new_nodes = []
     for node in old_nodes:
         if node.text_type is not TextType.TEXT:
-            raise Exception("Nodes can only be TextType.TEXT")
-        extract = extract_markdown_images(node.text)
-        text_types = list(filter(None, re.split(r"\[.*?\]\(.*?\)", node.text)))
-        ecount = 0
-        tcount = 0
-        for i in range(len(extract) + len(text_types)):
-            if i % 2 == 0:
-                new = TextNode(text_types[tcount], TextType.TEXT)
-                new_nodes.append(new)
-                tcount += 1
-            else:
-                new = TextNode(extract[ecount][0], TextType.LINK, extract[ecount][1])
-                new_nodes.append(new)
-                ecount += 1
+            new_nodes.append(node)
+        else:
+            extract = extract_markdown_links(node.text)
+            text_types = list(filter(None, re.split(r"\[.*?\]\(.*?\)", node.text)))
+            ecount = 0
+            tcount = 0
+            for i in range(len(extract) + len(text_types)):
+                if i % 2 == 0:
+                    new = TextNode(text_types[tcount], TextType.TEXT)
+                    new_nodes.append(new)
+                    tcount += 1
+                else:
+                    new = TextNode(extract[ecount][0], TextType.LINK, extract[ecount][1])
+                    new_nodes.append(new)
+                    ecount += 1
     return new_nodes
+
+#Bringing it all together
+def text_to_textnodes(text):
+    input = [TextNode(text, TextType.TEXT)]
+    bold = split_nodes_delimiter(input, "**", TextType.BOLD)
+    italic = split_nodes_delimiter(bold, "_", TextType.ITALIC)
+    code = split_nodes_delimiter(italic, "`", TextType.CODE)
+    image = split_nodes_image(code)
+    link = split_nodes_link(image)
+    return link
+
+
+#Converts a markdown string into a list of block strings
+def markdown_to_blocks(markdown):
+    res = []
+    for n in markdown.split("\n\n"):
+        res.append(n.strip())
+    return res
