@@ -110,9 +110,47 @@ def text_to_textnodes(text):
     return link
 
 
-#Converts a markdown string into a list of block strings
+
 def markdown_to_blocks(markdown):
     res = []
     for n in markdown.split("\n\n"):
         res.append(n.strip())
     return res
+
+
+def block_to_blocktype(block):
+    lines = block.split("\n")
+
+    if block[0:3] == "```" and block[-3:] == "```":
+        return BlockType.CODE
+    elif block[0] == "#" and "#######" not in block:
+        for i, char in enumerate(block):
+            if char != '#':
+                if char == ' ':
+                    return BlockType.HEADING
+                break
+    elif all(line[0] == ">" for line in lines):
+        return BlockType.QUOTE
+    elif all(line[0:2] == "- " for line in lines):
+        return BlockType.UNORDEREDLIST
+    elif all(line.split(". ", 1)[0].isdigit() and ". " in line for line in lines):
+        if all(int(line.split(". ", 1)[0]) == i + 1 for i, line in enumerate(lines)):
+            return BlockType.ORDEREDLIST
+
+    return BlockType.PARAGRAPH
+
+
+
+
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    print(blocks)
+    for block in blocks:
+        blocktype = block_to_blocktype(block)
+#
+# test = '''# Hey
+#
+# ```sup```'''
+#
+# markdown_to_html_node(test)

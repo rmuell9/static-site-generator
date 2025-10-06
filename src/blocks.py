@@ -1,7 +1,8 @@
 from enum import Enum
 
+
 class BlockType(Enum):
-    HEADING = "# Heading"
+    HEADING = "### Heading"
     CODE = "```Code```"
     QUOTE = ">Quote"
     UNORDEREDLIST = "- Unordered List"
