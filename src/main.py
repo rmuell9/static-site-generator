@@ -11,7 +11,7 @@ def main():
     except:
         basepath = "/"
     def public(copy):
-        dest = "public/"
+        dest = "docs/"
         if os.path.exists(dest) and os.path.exists(copy):
             for thing in os.listdir(dest):
                 target = dest + thing
@@ -56,5 +56,5 @@ def main():
 
 
     public("static/")
-    generate_page_rec("content/", "template.html", "public/", basepath)
+    generate_page_rec("content/", "template.html", "docs/", basepath)
 main()
