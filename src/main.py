@@ -2,7 +2,6 @@ import os
 import sys
 import shutil
 import conversion
-from htmlnode import HTMLNode
 
 
 def main():
@@ -10,6 +9,7 @@ def main():
         basepath = sys.argv[1]
     except:
         basepath = "/"
+
     def public(copy):
         dest = "docs/"
         if os.path.exists(dest) and os.path.exists(copy):
@@ -42,7 +42,6 @@ def main():
     def generate_page_rec(dir_path_content, template_path, dest_dir_path, basepath):
         if not os.path.exists(dest_dir_path):
             os.makedirs(dest_dir_path)
-            
         for thing in os.listdir(dir_path_content):
             source_path = os.path.join(dir_path_content, thing)
             if os.path.isfile(source_path) and thing.endswith(".md"):
@@ -53,7 +52,8 @@ def main():
                 dest_sub_dir = os.path.join(dest_dir_path, thing)
                 generate_page_rec(source_path, template_path, dest_sub_dir, basepath)
 
-
     public("static/")
     generate_page_rec("content/", "template.html", "docs/", basepath)
+
+
 main()
